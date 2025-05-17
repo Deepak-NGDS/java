@@ -28,6 +28,3 @@ catch(error){
  }
  
 
- // const values = countries.map(c => [
-    // c.id,c.cname,c.created_on, null,c.hcode,c.address,c.contact_num,c.fax_num,c.maps_loc,null        
-    // ])
