@@ -1,0 +1,29 @@
+{
+    "my_db" : 
+    {
+    "host": "localhost",
+    "port" : 3360,
+    "user": "root",
+    "password": "Swathi@2002",
+    "database": "devdb"
+    },
+
+
+ "dev_db":
+    {
+  "host": "35.244.19.98",
+  "user": "hubber",
+  "password": "VenaHub@18",
+  "database": "mhub"
+    },
+
+
+
+ "new_db" :
+   { "host": "192.168.0.101",
+    "user": "root",
+    "password": "root",
+    "database": "test_db"
+}
+
+}
