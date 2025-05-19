@@ -1,22 +1,21 @@
 import { createConnection } from 'mysql2/promise';
 import fs from 'fs';
-import  {format} from "date-fns"
 
-const config = fs.readFileSync('config_db.json', 'utf-8')
+const config = fs.readFileSync('config_dbs.json', 'utf-8')
 const configj = JSON.parse(config)
 
 function Delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
    }
 
-function logtonewdb(plant_id,message) {
-    const timestamp = format(new Date(), 'YYYY-MM-DD HH:MM:SS')
-    const dateonly = format (new Date(),'YYYY-MM-DD')
-    createConnection(configj.new_db)
+function logtonewdb(message) {
+    const timeStamp=Date.now()
+   
+    const connection =createConnection(configj.new_db)
     .then((connection)=>{
-        connection.execute(`INSERT INTO test_logs (ts,tdate,plant_id,plant_name,description) VALUES (?,?,?)`, [timestamp,dateonly,plant_id,message])
+        connection.execute(`INSERT INTO test_logs (ts,description) VALUES (?,?)`, [timeStamp,message])
 
-    }).then(()=>connection.end())
+    })
 }
 
 function fetchPlantFromDev(id){
@@ -25,7 +24,6 @@ function fetchPlantFromDev(id){
         connection.execute(`SELECT * FROM mas_sites WHERE id = ?`,[id])
     )
     .then(([rows])=>{
-        connection.end()
         return rows
 
     })
@@ -41,9 +39,7 @@ function insertIntomydb(c){
             c.address,c.spv_id_fk,c.utr_num,c.store_address,c.contact_num,c.fax_num,c.num_of_turbines,c.price_unit,c.feeder_id_fk,c.isDataCollectionEnabled,c.alias_name,c.timezone_id_fk,c.effeciency,
             c.def_air_density,c.hcode,c.isMetMastAvailable]
         connection.query(sql,[c])
-        .then(()=>{
-            connection.end()
-        })
+        .then(()=>{})
     })
 
 }
@@ -57,19 +53,19 @@ function main(count){
             }
 
     const id = currentid++
-    const t= date.now()
+    const t= Date.now()
     const t1= t % 2000
     logtonewdb(`${id}` ,` Going to fetch ${id} from devdb`)
     Delay(t1)
     .then(()=>
     fetchPlantFromDev(id))
     .then((rows)=>{
-        if(rows.length==0){
+        if(rows===0){
             logtonewdb(`${id}` ,` no such ${id} present in table`)
             .then(()=> allPlants())
 
         }
-    })
+        })
 
     Delay(t1)
     .then(()=>
