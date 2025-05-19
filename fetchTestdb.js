@@ -50,7 +50,7 @@ function insertIntomydb(c){
 
 function main(count){
     let currentid=267
-    new Promise((resolve,reject)=>{
+    return new Promise((resolve,reject)=>{
         function allPlants(){
             if(currentid >= 267 + count){
                 resolve()
@@ -60,51 +60,38 @@ function main(count){
     const t= date.now()
     const t1= t % 2000
     logtonewdb(`${id}` ,` Going to fetch ${id} from devdb`)
+    Delay(t1)
     .then(()=>
-    Delay(t1))
-    .then(()=>
-    fetchPlantFromDev(id)
-    )
-    .then((c)=>{
-        if(c.length==0){
+    fetchPlantFromDev(id))
+    .then((rows)=>{
+        if(rows.length==0){
             logtonewdb(`${id}` ,` no such ${id} present in table`)
-            .then(()=> next())
+            .then(()=> allPlants())
 
         }
     })
 
-    const plantid = c[0]
-    .then(()=>{
-        Delay(t1)
-    })
-    .then(()=>{
+    Delay(t1)
+    .then(()=>
       logtonewdb ( `${id}` ,` fetched ${id} from devdb`)
-    })
-    .then(()=>{
-        Delay(t1)
-    })
-    .then(()=>{
-        logtonewdb(`${id}` ,` Going to insert ${id} into mydb`)
-    })
-    .then(()=>{Delay(t1)})
-    .then(()=>{
-        insertIntomydb(plantid)
-    })
-    .then(()=>{
-        Delay(t1)
-    })
-    .then(()=>{
-        logtonewdb(`${id}` ,`inserted ${id} into mydb`)
-    })
+    )
+    .then(()=>Delay(t1))
+    .then(()=>logtonewdb(`${id}` ,` Going to insert ${id} into mydb`))
+    .then(()=>Delay(t1))
+    .then(()=>insertIntomydb(rows))
+    .then(()=>Delay(t1))
+    .then(()=>logtonewdb(`${id}` ,`inserted ${id} into mydb`))
 .catch((error)=>{
+    console.log(error)
+.then(()=> allPlants())
+})
+.catch((error) =>{
     reject(error)
 })
-
-    }
-        allPlants()
-       
-
+}
+    allPlants()
 })
+
 
 }
 

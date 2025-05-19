@@ -1,0 +1,22 @@
+{
+  "name": "control-11-added-logging",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "fetch_script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "format": "^0.2.2",
+    "fs": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.14.1",
+    "node-fetch": "^3.3.2"
+  },
+  "description": ""
+}
