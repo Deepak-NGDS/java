@@ -4,19 +4,29 @@ import fs from 'fs';
 const config = fs.readFileSync('config_dbs.json', 'utf-8')
 const configj = JSON.parse(config)
 
-function Delay(ms) {
+function delayTime(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
    }
 
-function logtonewdb(message) {
-    const timeStamp=Date.now()
-   
+function logtotestdb({ delayTime, plant_id = 10, plant_name = 'log', comnc_date = '-', capacity = 0, message }) {
+    const timeStamp= new Date().toString()
+    const dateOnly = new Date
     return createConnection(configj.dev_db)
     .then((connection)=>{
-       return connection.execute(`INSERT INTO test_logs_swathi (ts,description) VALUES (?,?)`, [timeStamp,message])
+       return connection.execute(`INSERT INTO test_logs_swathi (ts,tdate,delay,plant_id,plant_name,comnc_date,capacity,description) VALUES (?,?,?,?,?,?,?,?)`, 
+       [timeStamp,dateOnly, delayTime, plant_id, plant_name, comnc_date, capacity, message])
 
     })
 }
+
+function afterFetch(logId, data) {
+    return createConnection(configj.new_db)
+        .then(connection => {
+            const values =  [data.name,data.comm_date,data.site_capacity,logId]
+            return connection.query(sql,values)
+        })
+}
+
 
 function fetchPlantFromDev(id){
    return createConnection(configj.dev_db)
