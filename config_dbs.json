@@ -2,10 +2,10 @@
     "my_db" : 
     {
     "host": "localhost",
-    "port" : 3360,
+    "port" : 3306,
     "user": "root",
     "password": "Swathi@2002",
-    "database": "devdb"
+    "database": "assignmentdb"
     },
 
 
