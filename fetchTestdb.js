@@ -17,20 +17,20 @@ function logtotestdb({ delayTime, plant_id = 10, plant_name = 'log', comnc_date 
        [timeStamp,dateOnly, delayTime, plant_id, plant_name, comnc_date, capacity, message])
 
     })
-    .then((result)=>
-    {result.id })
+    .then(()=>
+    connection.end())
 }
 
-function afterFetch(Id, delayTime, message ,data) {
-    const timeStamp= new Date().toISOString()
-    const dateOnly = new Date(timeStamp).toISOString()
-    return createConnection(configj.dev_db)
-        .then(connection => {
-            const sql = ` UPDATE test_logs_swathi SET ts = ?, tdate = ?, delay = ?, plant_name = ?, comnc_date = ?, capacity = ?, description = ? WHERE id = ?`
-            const values =  [timeStamp,dateOnly, delayTime,data.plant_name,data.comnc_date,data.capacity,Id]
-            return connection.query(sql,values)
-        })
-}
+// function afterFetch(Id, delayTime, message ,data) {
+//     const timeStamp= new Date().toISOString()
+//     const dateOnly = new Date(timeStamp).toISOString()
+//     return createConnection(configj.dev_db)
+//         .then(connection => {
+//             const sql = ` UPDATE test_logs_swathi SET ts = ?, tdate = ?, delay = ?, plant_name = ?, comnc_date = ?, capacity = ?, description = ? WHERE id = ?`
+//             const values =  [timeStamp,dateOnly, delayTime,data.plant_name,data.comnc_date,data.capacity,Id]
+//             return connection.query(sql,values)
+//         })
+// }
 
 
 function fetchPlantFromDev(id){
@@ -39,6 +39,7 @@ function fetchPlantFromDev(id){
        return connection.execute(`SELECT * FROM mas_sites WHERE id = ?`,[id])
 })
     .then(([rows])=>{
+        connection.end()
         return rows
 
     })
@@ -55,6 +56,9 @@ function insertIntomydb(c){
             c.def_air_density,c.hcode,c.isMetMastAvailable]
        return connection.query(sql,values)
     })
+    .then(()=>{
+        connection.end()
+    })
 
 }
 
@@ -67,37 +71,39 @@ function main(count){
             }
 
     const id = currentid++
-    const t= Date.now()
-    const t1= t % 2000
-    return logtonewdb(` Going to fetch ${id} from devdb`)
-    .then(()=>Delay(t1))
-    .then(()=>fetchPlantFromDev(id))
-    .then((rows)=>{
-        if(rows.length ===0){
-            return logtonewdb(` no such ${id} present in table`)
-            .then(()=> allPlants())
+    const t1 = Date.now() % 2000;
+return delayTime(500)
+  .then(() => logtotestdb({ delayTime: 500, plant_id: 10, plant_name: 'log', comnc_date: '-', capacity: 0, message: `Going to fetch ${id} from devdb` }))
+  .then(() => delayTime(t1))
+  .then(() => {
+    const t2 = Date.now() % 2000;
+    return fetchPlantFromDev(id).then((rows) => {
+      if (rows.length === 0) {
+        return logtotestdb({ delayTime: t2, plant_id: 10, plant_name: 'log', comnc_date: '-', capacity: 0, message: `No such ${id} from devdb` })
+          .then(() => allPlants());
+      }
 
-        }
-    return Delay(t1)
-    .then(()=>
-      logtonewdb ( ` fetched ${id} from devdb`)
-    )
-    .then(()=>Delay(t1))
-    .then(()=>logtonewdb(` Going to insert ${id} into mydb`))
-    .then(()=>Delay(t1))
-    .then(()=>insertIntomydb(rows[0]))
-    .then(()=>Delay(t1))
-    .then(()=>logtonewdb(`inserted ${id} into mydb`))
-})
-.catch((error) =>{
-    allPlants()
+      const row = rows[0];
+
+      return logtotestdb({ delayTime: t2, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Fetched ${id} from devdb` })
+        .then(() => delayTime(Date.now() % 2000))
+        .then(() => logtotestdb({ delayTime: Date.now() % 2000, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Inserting ${id} into mydb` }))
+        .then(() => delayTime(Date.now() % 2000))
+        .then(() => insertIntomydb(row))
+        .then(() => delayTime(Date.now() % 2000))
+        .then(() => logtotestdb({ delayTime: Date.now() % 2000, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Inserted ${id} into mydb` }));
+    });
+  })
+  .then(() => allPlants())
+  .catch((error) => {
+    return allPlants()
+  })
+}
+  allPlants()
+
 })
 }
-    allPlants()
-})
 
-
-}
 
 main(128)
 .then(()=>{
