@@ -63,7 +63,8 @@ function main(count){
 
     const id = currentid++
    delayTime(500)
-  .then(() => logtotestdb({ delayTime: 500, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20' , capacity: 0, message: `fetching the plant of ${id} from devdb` }))
+  .then(() =>{
+  return logtotestdb({ delayTime: 500, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20' , capacity: 0, message: `fetching the plant of ${id} from devdb` })})
   .then(() => delayTime( Date.now() % 2000))
   .then(() => {
     const t2 = Date.now() % 2000;
