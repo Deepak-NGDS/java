@@ -9,20 +9,25 @@ function delayTime(ms) {
    }
 
 function logtotestdb({ delayTime, plant_id = 10, plant_name = 'log', comnc_date = '-', capacity = 0, message }) {
-    const timeStamp= new Date().toString()
-    const dateOnly = new Date
+    const timeStamp= new Date().toISOString()
+    const dateOnly = new Date(timeStamp).toISOString()
     return createConnection(configj.dev_db)
     .then((connection)=>{
        return connection.execute(`INSERT INTO test_logs_swathi (ts,tdate,delay,plant_id,plant_name,comnc_date,capacity,description) VALUES (?,?,?,?,?,?,?,?)`, 
        [timeStamp,dateOnly, delayTime, plant_id, plant_name, comnc_date, capacity, message])
 
     })
+    .then((result)=>
+    {result.id })
 }
 
-function afterFetch(logId, data) {
-    return createConnection(configj.new_db)
+function afterFetch(Id, delayTime, message ,data) {
+    const timeStamp= new Date().toISOString()
+    const dateOnly = new Date(timeStamp).toISOString()
+    return createConnection(configj.dev_db)
         .then(connection => {
-            const values =  [data.name,data.comm_date,data.site_capacity,logId]
+            const sql = ` UPDATE test_logs_swathi SET ts = ?, tdate = ?, delay = ?, plant_name = ?, comnc_date = ?, capacity = ?, description = ? WHERE id = ?`
+            const values =  [timeStamp,dateOnly, delayTime,data.plant_name,data.comnc_date,data.capacity,Id]
             return connection.query(sql,values)
         })
 }
