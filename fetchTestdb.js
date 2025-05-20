@@ -14,18 +14,16 @@ function logtotestdb({ delayTime, plant_id = 10, plant_name = 'log', comnc_date 
     const dateOnly = new Date(timeStamp).toISOString()
     return createConnection(configj.dev_db)
     .then((connection)=>{
-       return connection.execute(`INSERT INTO test_logs_swathi (ts,tdate,delay,plant_id,plant_name,comnc_date,capacity,description) VALUES (?,?,?,?,?,?,?,?)`, 
-       [timeStamp,dateOnly, delayTime, plant_id, plant_name, comnc_date, capacity, message])
-       .then(() => {
-        if (delayTime > 100) {
-          return connection.execute(`INSERT INTO test_logs_swathi (ts, tdate, delay, plant_id, plant_name, comnc_date, capacity, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [timeStamp, dateOnly, delayTime, plant_id, plant_name, comnc_date, capacity, ` waiting for ${delayTime} ms`]
-          )
-        }
+        return connection.execute(`INSERT INTO test_logs_swathi (ts, tdate, delay, plant_id, plant_name, comnc_date, capacity, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [timeStamp, dateOnly, delayTime, plant_id, plant_name, comnc_date, capacity, ` waiting for ${delayTime} ms`])
+        
+    .then(() => {
+         
+        return connection.execute(`INSERT INTO test_logs_swathi (ts,tdate,delay,plant_id,plant_name,comnc_date,capacity,description) VALUES (?,?,?,?,?,?,?,?)`, 
+        [timeStamp,dateOnly, delayTime, plant_id, plant_name, comnc_date, capacity, message])
       })
 
     })
-   
 }
 
 function fetchPlantFromDev(id){
