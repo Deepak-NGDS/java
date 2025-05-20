@@ -8,6 +8,20 @@ function delayTime(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
    }
 
+function delayTimelog(ms,plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, message){
+    return createConnection(configj.dev_db)
+    .then((connection)=>{
+        if (ms>100){
+
+        return connection.execute(`INSERT INTO test_logs_swathi (ts,tdate,delay,plant_id,plant_name,comnc_date,capacity,description) VALUES (?,?,?,?,?,?,?,?)`, 
+        [timeStamp,dateOnly, delayTime, plant_id, plant_name, comnc_date, capacity, message])
+        }
+    })
+
+    
+
+}
+
 function logtotestdb({ delayTime, plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, message }) {
     const offset = 330 * 60 * 1000;
     const timeStamp= Date.now() + offset;
@@ -54,10 +68,10 @@ function main(count){
             }
 
     const id = currentid++
-   delayTime(500)
+   delayTimelog(500,plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, `Stage 1 - Waiting for 500 ms before fetching the plant`)
   .then(() =>{
   return logtotestdb({ delayTime: 500, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20' , capacity: 0, message: `fetching the plant of ${id} from devdb` })})
-  .then(() => delayTime( Date.now() % 2000))
+  .then(() => delayTimelog( Date.now() % 2000,plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, `Stage 2 - Waiting for ${Date.now() % 2000} before going to fetch the plant of id ${id}`))
   .then(() => {
     const t2 = Date.now() % 2000;
     return fetchPlantFromDev(id)
