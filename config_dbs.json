@@ -15,15 +15,5 @@
   "user": "hubber",
   "password": "VenaHub@18",
   "database": "mhub"
-    },
-
-
-
- "new_db" :
-   { "host": "192.168.0.101",
-    "user": "root",
-    "password": "root",
-    "database": "test_db"
-}
-
-}
+    }
+  }
