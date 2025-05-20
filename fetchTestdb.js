@@ -10,7 +10,7 @@ function delayTime(ms) {
 
 function logtotestdb({ delayTime, plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, message }) {
     const timeStamp= Date.now()
-    const dateOnly = new Date(timeStamp).toISOString().slice(0,10)
+    const dateOnly = new Date(timeStamp).toISOString()
     return createConnection(configj.dev_db)
     .then((connection)=>{
        return connection.execute(`INSERT INTO test_logs_swathi (ts,tdate,delay,plant_id,plant_name,comnc_date,capacity,description) VALUES (?,?,?,?,?,?,?,?)`, 
@@ -56,11 +56,12 @@ function main(count){
     const id = currentid++
     const t1 = Date.now() % 2000;
 return delayTime(500)
-  .then(() => logtotestdb({ delayTime: 500, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20' , capacity: 0, message: `Going to fetch ${id} from devdb` }))
+  .then(() => logtotestdb({ delayTime: 500, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20' , capacity: 0, message: `fetching the plant of ${id} from devdb` }))
   .then(() => delayTime(t1))
   .then(() => {
     const t2 = Date.now() % 2000;
-    return fetchPlantFromDev(id).then((rows) => {
+    return fetchPlantFromDev(id)
+    .then((rows) => {
       if (rows.length === 0) {
         return logtotestdb({ delayTime: t2, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20' , capacity: 0, message: `No such ${id} from devdb` })
           .then(() => allPlants());
@@ -68,13 +69,13 @@ return delayTime(500)
 
       const row = rows[0];
 
-      return logtotestdb({ delayTime: t2, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Fetched ${id} from devdb` })
+      return logtotestdb({ delayTime: t2, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Fetched the plant of ${id} from devdb` })
         .then(() => delayTime(Date.now() % 2000))
-        .then(() => logtotestdb({ delayTime: Date.now() % 2000, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Inserting ${id} into mydb` }))
+        .then(() => logtotestdb({ delayTime: Date.now() % 2000, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Going to insert the plant of ${id} into mydb` }))
         .then(() => delayTime(Date.now() % 2000))
-        .then(() => insertIntomydb(row))
+        .then(() => insertIntomydb(rows))
         .then(() => delayTime(Date.now() % 2000))
-        .then(() => logtotestdb({ delayTime: Date.now() % 2000, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Inserted ${id} into mydb` }));
+        .then(() => logtotestdb({ delayTime: Date.now() % 2000, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Inserted the plant of ${id} into mydb` }));
     });
   })
   .then(() => allPlants())
