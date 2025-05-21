@@ -64,10 +64,10 @@ function main(count){
             }
 
     const id = currentid++
-   delayTimelog(500,plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, `Stage 1 - Waiting for 500 ms before fetching the plant`)
+   delayTimelog(500,10, 'log',  '2025-05-20', 0, `Stage 1 - Waiting for 500 ms before fetching the plant`)
   .then(() =>{
   return logtotestdb({ delayTime: 500, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20' , capacity: 0, message: `fetching the plant of ${id} from devdb` })})
-  .then(() => delayTimelog( Date.now() % 2000,plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, `Stage 2 - Waiting for ${Date.now() % 2000} before going to fetch the plant of id ${id}`))
+  .then(() => delayTimelog( Date.now() % 2000, 10,  'log', '2025-05-20',  0, `Stage 2 - Waiting for ${Date.now() % 2000} before going to fetch the plant of id ${id}`))
   .then(() => {
     const t2 = Date.now() % 2000;
     return fetchPlantFromDev(id)
@@ -80,11 +80,11 @@ function main(count){
       const row = rows[0];
 
       return logtotestdb({ delayTime: t2, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Fetched the plant of ${id} from devdb` })
-        .then(() => delayTimelog(Date.now() % 2000,plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, `Stage 3 - Waiting for ${Date.now() % 2000} after fetching the plant of id ${id}`))
+        .then(() => delayTimelog(Date.now() % 2000, 10, 'log', '2025-05-20',0, `Stage 3 - Waiting for ${Date.now() % 2000} after fetching the plant of id ${id}`))
         .then(() => logtotestdb({ delayTime: Date.now() % 2000, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Going to insert the plant of ${id} into mydb` }))
-        .then(() => delayTime(Date.now() % 2000,plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, `Stage 4 - Waiting for ${Date.now() % 2000} before inserting the plant of id ${id}`))
+        .then(() => delayTime(Date.now() % 2000, 10,  'log',  '2025-05-20', 0, `Stage 4 - Waiting for ${Date.now() % 2000} before inserting the plant of id ${id}`))
         .then(() => insertIntomydb(row))
-        .then(() => delayTime(Date.now() % 2000,plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, `Stage 5 - Waiting for ${Date.now() % 2000} after inserting the plant of id ${id}`))
+        .then(() => delayTime(Date.now() % 2000, 10, 'log', '2025-05-20',  0, `Stage 5 - Waiting for ${Date.now() % 2000} after inserting the plant of id ${id}`))
         .then(() => logtotestdb({ delayTime: Date.now() % 2000, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Inserted the plant of ${id} into mydb` }));
     });
   })
