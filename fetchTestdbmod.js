@@ -17,7 +17,26 @@ function delayTimelog(ms,plant_id = 10, plant_name = 'log', comnc_date = '2025-0
     }
 
 }
+function avgCapacity(row) {
+    createConnection(configj.dev_db)
+    .then((connection) => {
+        connection.execute("SELECT id, site_capacity FROM mas_sites")
 
+            const average = total / count;
+            function loop() {
+                if (row.capacity >= average) {
+                    logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity: current,message: `capacity of plant ${id} is uploaded`})
+                } else {
+                    row.capacity = row.capacity + 3;
+
+                    logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity: current,message: `Incremented`})
+                    .then(() => {loop()})
+                }
+            }
+
+            loop()
+        })
+}
 
 
 function logtotestdb({ delayTime, plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, message=null }) {
@@ -30,6 +49,7 @@ function logtotestdb({ delayTime, plant_id = 10, plant_name = 'log', comnc_date 
         [timeStamp,dateOnly, delayTime, plant_id, plant_name, comnc_date, capacity, message])
     })
 }
+
 
 
 function fetchPlantFromDev(id){
@@ -97,7 +117,8 @@ function stage3({ id, row, t2 }) {
         .then(() => logtotestdb({ delayTime: t2, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Plant is fetched with ${id}` }))
         .then(() => {
             const t3 = Date.now() % 2000
-            return delayTimelog(t3, 10, 'log', '2025-05-20', 0, `Stage 3 - Waiting for ${t3} to go to 4th stage`).then(() => ({ id, row, t3 }))
+            return delayTimelog(t3, 10, 'log', '2025-05-20', 0, `Stage 3 - Waiting for ${t3} to go to 4th stage`)
+            .then(() => ({ id, row, t3 }))
         })
 }
 
@@ -163,7 +184,7 @@ function main(count) {
 
 main(11)
     .then(() => {
-        console.log("all plants processed ")
+        console.log("all plants processed")
     })
     .catch((error) => {
         console.log(error)
