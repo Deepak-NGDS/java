@@ -72,7 +72,7 @@ function main(count){
         })
           .then(()=>{
              const t1= Date.now() % 2000
-           return delayTimelog( t1, 10,  'log', '2025-05-20',  0, `Waiting for ${t1} to go to 2nd stage`)
+           return delayTimelog( t1, 10,  'log', '2025-05-20',  0, `stage 1-Waiting for ${t1} to go to 2nd stage`)
             .then(()=>t1)
           })
             // stage 2
