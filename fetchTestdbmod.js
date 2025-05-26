@@ -4,31 +4,35 @@ import fs from 'fs';
 const config = fs.readFileSync('config_dbs.json', 'utf-8')
 const configj = JSON.parse(config)
 
-function delayTime(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-   }
+// function delayTime(ms) {
+//     return new Promise(resolve => setTimeout(resolve, ms));
+//    }
 
 function delayTimelog(ms,plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, message=null){
+    return new Promise((resolve, reject) => {
     if (ms>200){
             logtotestdb({ delayTime: ms, plant_id, plant_name, comnc_date, capacity, message });
-         return delayTime(ms)
+         setTimeout(resolve,ms)
     } else {
-        return delayTime(ms)
+        setTimeout(resolve,ms)
     }
+})
 }
+
 function avgCapacity(row) {
     createConnection(configj.dev_db)
     .then((connection) => {
-        return connection.execute("SELECT site_capacity FROM mas_sites")})
+        return connection.execute("SELECT site_capacity FROM mas_sites WHERE site_capacity > 50")})
         .then(([rows])=>{
 
         let total =0
         for (let i = 0; i < rows.length; i++) {
          total = total + rows[i].site_capacity
         }
+        
         const average = total / rows.length                           
-             let current = row.site_capacity
-            // console.log("average", average)
+             let current = row.site_capacity 
+            console.log("average", average)
             function loop() {
                 if (current >= average) {
                    return logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity:current ,message: `capacity of plant ${row.id} is same as average`})
@@ -181,7 +185,7 @@ function main(count) {
 }
 
 
-main(5)
+main(2)
     .then(() => {
         console.log("all plants processed")
     })
