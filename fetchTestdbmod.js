@@ -19,20 +19,19 @@ function delayTimelog(ms,plant_id = 10, plant_name = 'log', comnc_date = '2025-0
 function avgCapacity(row) {
     createConnection(configj.dev_db)
     .then((connection) => {
-        connection.execute("SELECT id, site_capacity FROM mas_sites")
-        .then(([rows])=>{const row = rows[0]})
+        return connection.execute("SELECT site_capacity FROM mas_sites")})
+        .then(([rows])=>{
 
-        let count = 0
         let total =0
-        for (let i = 0; i < row.length; i++) {
-          total = total + row[i].site_capacity
-          count = count + 1
+        for (let i = 0; i < rows.length; i++) {
+         total = total + rows[i].site_capacity
         }
-            let current = row.site_capacity
-            const average = total / count
+        const average = total / rows.length                           
+             let current = row.site_capacity
+            // console.log("average", average)
             function loop() {
                 if (current >= average) {
-                   return logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity:current ,message: `capacity of plant ${row.id} is uploaded`})
+                   return logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity:current ,message: `capacity of plant ${row.id} is same as average`})
                 } else {
                     current = current + 3
 
@@ -41,7 +40,7 @@ function avgCapacity(row) {
                 }
             }
 
-            loop()
+           loop()
         })
 }
 
@@ -114,7 +113,7 @@ function stage2({ id, t1 }) {
 function stage3({ id, row, t2}) {
     return delayTimelog(t2, 10, 'log', '2025-05-20', 0, `Stage 3 - Waiting for ${t2} in 3rd stage`)
         .then(() => logtotestdb({ delayTime: t2, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Plant is fetched with ${id}` }))
-        // .then(()=>avgCapacity(row,id))
+        .then(()=>avgCapacity(row))
         .then(() => {
             const t3 = Date.now() % 2000
             return delayTimelog(t3, 10, 'log', '2025-05-20', 0, `Stage 3 - Waiting for ${t3} to go to 4th stage`)
