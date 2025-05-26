@@ -21,15 +21,23 @@ function avgCapacity(row) {
     createConnection(configj.dev_db)
     .then((connection) => {
         connection.execute("SELECT id, site_capacity FROM mas_sites")
+        .then(([rows])=>{const row = rows[0]})
+
+        let count = 0
+        let total =0
+        for (let i = 0; i < row.length; i++) {
+          total = total + row[i].site_capacity
+          count = count + 1
+        }
 
             const average = total / count;
             function loop() {
-                if (row.capacity >= average) {
-                    logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity: current,message: `capacity of plant ${id} is uploaded`})
+                if (row.site_capacity >= average) {
+                    logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity:row.site_capacity,message: `capacity of plant ${row.id} is uploaded`})
                 } else {
-                    row.capacity = row.capacity + 3;
+                    row.capacity = row.site_capacity + 3;
 
-                    logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity: current,message: `Incremented`})
+                    logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity:row.site_capacity,message: `Incremented to ${row.site_capacity}`})
                     .then(() => {loop()})
                 }
             }
@@ -97,24 +105,16 @@ function stage2({ id, t1 }) {
                 return logtotestdb({ delayTime: t1, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20', capacity: 0, message: `No such ${id} from devdb` })
                     .then(() => null)
             }
-            return { id, row: rows[0] }
+            const row = rows[0]
+            const t2 = Date.now() % 2000
+            return {id: id,row: row,t2: t2}
         })
-        .then((result) => {
-            if (!result) {
-                return null
-            }
-            const t2 = Date.now() % 2000;
-            return delayTimelog(t2, 10, 'log', '2025-05-20', 0, 'Stage 2 - Waiting before moving to next step')
-                .then(() => {
-                    result.t2 = t2
-                    return result
-                })
-            })
-        }
+    }
 
-function stage3({ id, row, t2 }) {
+function stage3({ id, row, t2}) {
     return delayTimelog(t2, 10, 'log', '2025-05-20', 0, `Stage 3 - Waiting for ${t2} in 3rd stage`)
         .then(() => logtotestdb({ delayTime: t2, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Plant is fetched with ${id}` }))
+        .then(()=>avgCapacity(row,id))
         .then(() => {
             const t3 = Date.now() % 2000
             return delayTimelog(t3, 10, 'log', '2025-05-20', 0, `Stage 3 - Waiting for ${t3} to go to 4th stage`)
@@ -182,7 +182,7 @@ function main(count) {
 }
 
 
-main(11)
+main(3)
     .then(() => {
         console.log("all plants processed")
     })
