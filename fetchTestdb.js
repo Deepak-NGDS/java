@@ -56,22 +56,23 @@ function insertIntomydb(c){
 }
 
 function main(count){
-    let currentid=267
+    let currentid=295
     return new Promise((resolve,reject)=>{
         function allPlants(){
-            if(currentid >= 267 + count){
+            if(currentid >= 295 + count){
                return resolve()
             }
 
             const id = currentid++
-            // stage 1
-           delayTimelog(500,10, 'log',  '2025-05-20', 0, `Stage 1 - Waiting for 500 ms before fetching the plant`)
-          .then(() =>{
-            logtotestdb({ delayTime: 500, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20' , capacity: 0, message: `going to fetch the plant of ${id} from devdb` })
+            // stage 1        
+          delayTimelog(500,10, 'log',  '2025-05-20', 0, `Stage 1 - Waiting for 500 ms before fetching the plant`)
+         .then(() =>{
+            return logtotestdb({ delayTime: 500, plant_id: 10, plant_name: 'log', comnc_date: '2025-05-20' , capacity: 0, message: `going to fetch the plant of ${id} from devdb` })
+
         })
           .then(()=>{
              const t1= Date.now() % 2000
-           return delayTimelog( t1, 10,  'log', '2025-05-20',  0, `Waiting for ${t1} to go to 2nd stage`)
+           return delayTimelog( t1, 10,  'log', '2025-05-20',  0, `stage 1-Waiting for ${t1} to go to 2nd stage`)
             .then(()=>t1)
           })
             // stage 2
@@ -93,7 +94,7 @@ function main(count){
              .then(()=>({t2,rows,id}))
             })
          
-             //stage 3 of the whole process
+             //stage 3 
                 .then(({t2,rows,id}) =>{
                     const row = rows[0]
                    return delayTimelog(t2, 10, 'log', '2025-05-20',0, `Stage 3 - Waiting for ${t2} in 3rd stage stage`)
@@ -129,25 +130,26 @@ function main(count){
                  return delayTimelog(t5, 10,  'log',  '2025-05-20', 0, `Stage 5 - Waiting for ${t5} for 6th stage`)
                     .then(()=>({t5,row,id}))
                 })
+                
                  //stage 6    
                 .then(({t5,row,id}) => {
+
                  return delayTimelog(t5, 10, 'log', '2025-05-20',  0, `Stage 6 - Waiting for ${t5} in 6th  stage`)
                 .then(()=>{logtotestdb({ delayTime: t5, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Inserted the plant of ${id} into mydb` })})
             })
-         
-          .then(() => allPlants())
+            .then(()=> {return allPlants()})
           .catch((error) => {
-            console.log(error)
-            return allPlants()
+            return allPlants() 
           })
+
                 }
+                allPlants()
          
-          allPlants()
             })
          
         }
 
-main(128)
+main(6)
 .then(()=>{
     console.log("all the plant id are inserted")
 })
