@@ -20,34 +20,40 @@ function delayTimelog(ms,plant_id = 10, plant_name = 'log', comnc_date = '2025-0
 }
 
 function avgCapacity(row) {
-    createConnection(configj.dev_db)
+   return createConnection(configj.dev_db)
     .then((connection) => {
         return connection.execute("SELECT site_capacity FROM mas_sites WHERE site_capacity > 50")})
         .then(([rows])=>{
 
-        let total =0
+        let total = 0
         for (let i = 0; i < rows.length; i++) {
          total = total + rows[i].site_capacity
         }
         
         const average = total / rows.length                           
              let current = row.site_capacity 
-            console.log("average", average)
+            // console.log("average", average)
+            return new Promise((resolve)=>{
             function loop() {
+               
                 if (current >= average) {
                     row.site_capacity = current
                    return logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity:current ,message: `capacity of plant ${row.id} is same as average`})
+                   .then(()=>resolve(row))
                 } else {
                     current = current + 3
 
-                    logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity:current ,message: `Incremented to ${current}`})
-                    .then(() => {loop()})
+                   return logtotestdb({delayTime: 0,plant_id: row.id,plant_name: row.name,comnc_date: row.comm_date,capacity:current ,message: `Incremented to ${current}`})
+                    .then(() => loop())
                 }
-            }
+                }
 
            loop()
+
+            })
         })
-}
+    }
+        
 
 
 function logtotestdb({ delayTime, plant_id = 10, plant_name = 'log', comnc_date = '2025-05-20', capacity = 0, message=null }) {
@@ -78,9 +84,9 @@ function fetchPlantFromDev(id){
 function insertIntomydb(c){
    return createConnection(configj.my_db)
     .then((connection)=>{
-        const sql = `INSERT IGNORE INTO mas_sites (id,name,region_id_fk, asset_type_id_fk, created_on,created_by_fk,comm_date,lati,longi,unit_price,site_capacity,power_metric_fk,
+        const sql = `INSERT INTO mas_sites (id,name,region_id_fk, asset_type_id_fk, created_on,created_by_fk,comm_date,lati,longi,unit_price,site_capacity,power_metric_fk,
         address,spv_id_fk,utr_num,store_address,contact_num,fax_num,num_of_turbines,price_unit,feeder_id_fk,isDataCollectionEnabled,alias_name,timezone_id_fk,effeciency,
-        def_air_density,hcode,isMetMastAvailable) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+        def_air_density,hcode,isMetMastAvailable) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE site_capacity = VALUES(site_capacity)`
         const values = [c.id,c.name,c.region_id_fk, c.asset_type_id_fk, c.created_on,c.created_by_fk,c.comm_date,c.lati,c.longi,c.unit_price,c.site_capacity,c.power_metric_fk,
             c.address,c.spv_id_fk,c.utr_num,c.store_address,c.contact_num,c.fax_num,c.num_of_turbines,c.price_unit,c.feeder_id_fk,c.isDataCollectionEnabled,c.alias_name,c.timezone_id_fk,c.effeciency,
             c.def_air_density,c.hcode,c.isMetMastAvailable]
@@ -124,10 +130,10 @@ function stage3({ id, row, t2}) {
     return delayTimelog(t2, 10, 'log', '2025-05-20', 0, `Stage 3 - Waiting for ${t2} in 3rd stage`)
         .then(() => logtotestdb({ delayTime: t2, plant_id: row.id, plant_name: row.name, comnc_date: row.comm_date, capacity: row.site_capacity, message: `Plant is fetched with ${id}` }))
         .then(()=>avgCapacity(row))
-        .then(() => {
+        .then((updatedRow) => {
             const t3 = Date.now() % 2000
             return delayTimelog(t3, 10, 'log', '2025-05-20', 0, `Stage 3 - Waiting for ${t3} to go to 4th stage`)
-            .then(() => resolve({ id,row, t3 }))
+            .then(() => resolve({ id,row:updatedRow, t3 }))
         }).catch(reject)
 })
 }
@@ -201,7 +207,7 @@ function main(count) {
 }
 
 
-main(2)
+main(5)
     .then(() => {
         console.log("all plants processed")
     })
